@@ -1,4 +1,4 @@
-package com.androiddevs.runningappyt.di
+package com.androiddevs.runningappyt.dagger
 
 import android.content.Context
 import androidx.room.Room
