@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigationView.setupWithNavController(navHostFragment.findNavController())
 
+        // don't reload the fragment again
+        bottomNavigationView.setOnNavigationItemReselectedListener { /* NO-OP */ }
+
         navHostFragment.findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.runFragment, R.id.statisticsFragment, R.id.settingsFragment -> {

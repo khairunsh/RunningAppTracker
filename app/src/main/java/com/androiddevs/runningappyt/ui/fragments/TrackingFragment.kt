@@ -86,22 +86,16 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
     }
 
     private fun showCancelTrackingDialog() {
-        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialogTheme)
-            .setTitle("Cancel the Run?")
-            .setMessage("Are you sure to cancel the current run and delete all its data?")
-            .setIcon(R.drawable.ic_delete)
-            .setPositiveButton("Yes") { _, _ ->
+        CancelTrackingDialog().apply {
+            setYesListener {
                 stopRun()
             }
-            .setNegativeButton("No") { dialog, _ ->
-                dialog.cancel()
-            }
-            .create()
-
-        dialog.show()
+        }.show(parentFragmentManager, Constants.CANCEL_TRACKING_DIALOG_TAG)
     }
 
     private fun stopRun() {
+        tvTimer.text = "00:00:00:00"
+
         sendCommandToService(Constants.ACTION_STOP_SERVICE)
 
         findNavController().navigate(R.id.action_trackingFragment_to_runFragment)
@@ -109,6 +103,13 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (savedInstanceState != null) {
+            // survive yes listener if rotate the device
+            val cancelTrackingDialog = parentFragmentManager.findFragmentByTag(Constants.CANCEL_TRACKING_DIALOG_TAG) as CancelTrackingDialog?
+
+            cancelTrackingDialog?.setYesListener { stopRun() }
+        }
 
         btnToggleRun.setOnClickListener {
             toggleRun()
@@ -165,10 +166,10 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
 
-        if (!isTracking) {
+        if (!isTracking && currentTimeInMillis > 0L) {
             btnToggleRun.text = "Start"
             btnFinishRun.visibility = View.VISIBLE
-        } else {
+        } else if (isTracking) {
             btnToggleRun.text = "Stop"
             btnFinishRun.visibility = View.GONE
 
